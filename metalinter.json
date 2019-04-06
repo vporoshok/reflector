@@ -1,0 +1,19 @@
+{
+    "DisableAll": true,
+    "Vendor": true,
+    "Deadline": "5m",
+    "Concurrency": 2,
+    "Exclude": ["vendor", "libexec"],
+    "Tests": true,
+    "Enable": [
+        "deadcode",
+        "goconst",
+        "gocyclo",
+        "golint",
+        "varcheck",
+        "structcheck",
+        "staticcheck",
+        "unconvert",
+        "vet"
+    ]
+}
