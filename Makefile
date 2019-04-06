@@ -13,7 +13,7 @@ cover       :
 
 lint        :
 	@echo "Linting..."
-	@GO111MODULE=off gometalinter --config=metalinter.json ./...
+	@golangci-lint run
 	@echo "PASS"
 	@echo ""
 

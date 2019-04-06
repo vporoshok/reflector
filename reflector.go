@@ -165,7 +165,6 @@ func (r Reflector) Apply(m map[string]string) error {
 	return nil
 }
 
-// nolint:gocyclo
 func (r Reflector) processValue(value reflect.Value, source string) error {
 	t := value.Type()
 	if len(source) == 0 {
@@ -194,18 +193,8 @@ func (r Reflector) processValue(value reflect.Value, source string) error {
 		return nil
 	}
 	if t.Kind() == reflect.Slice {
-		sources := strings.Split(source, ",")
-		values := reflect.MakeSlice(t, len(sources), len(sources))
-		for i, val := range sources {
-			err := r.processValue(values.Index(i), val)
-			if err != nil {
 
-				return err
-			}
-		}
-		value.Set(values)
-
-		return nil
+		return r.processSlice(t, value, source)
 	}
 	if t.Kind() == reflect.String {
 		value.SetString(source)
@@ -218,6 +207,21 @@ func (r Reflector) processValue(value reflect.Value, source string) error {
 	}
 
 	value.Set(reflect.ValueOf(dst).Elem())
+
+	return nil
+}
+
+func (r Reflector) processSlice(t reflect.Type, value reflect.Value, source string) error {
+	sources := strings.Split(source, ",")
+	values := reflect.MakeSlice(t, len(sources), len(sources))
+	for i, val := range sources {
+		err := r.processValue(values.Index(i), val)
+		if err != nil {
+
+			return err
+		}
+	}
+	value.Set(values)
 
 	return nil
 }
