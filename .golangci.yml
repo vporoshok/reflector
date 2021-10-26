@@ -7,14 +7,13 @@ run:
   concurrency: 4
 
   # timeout for analysis, e.g. 30s, 5m, default is 1m
-  deadline: 1m
+  deadline: 10m
 
   # exit code when at least one issue was found, default is 1
   issues-exit-code: 1
 
   # include test files or not, default is true
   tests: true
-
 # output configuration options
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
@@ -54,12 +53,13 @@ linters-settings:
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
-  golint:
-    # minimal confidence for issues, default is 0.8
-    min-confidence: 0.8
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
     simplify: true
+  goimports:
+    # put imports beginning with prefix after 3rd-party packages;
+    # it's a comma-separated list of prefixes
+    local-prefixes: git.elewise.com
   gocyclo:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 10
@@ -120,21 +120,44 @@ linters-settings:
     # Enable multiple checks by tags, run `GL_DEBUG=gocritic golangci-lint` run to see all tags and checks.
     # Empty list by default. See https://github.com/go-critic/go-critic#usage -> section "Tags".
     enabled-tags:
-      - performance
-
+      - style
+      # - perfomance
     settings: # settings passed to gocritic
       captLocal: # must be valid enabled check name
         paramsOnly: true
-      rangeValCopy:
-        sizeThreshold: 32
 
 linters:
-  enable-all: true
-  disable:
-    - maligned
-    - prealloc
+  disable-all: true
+  enable:
+    - bodyclose # checks whether HTTP response body is closed successfully [fast: false, auto-fix: false]
+    - deadcode # Finds unused code [fast: true, auto-fix: false]
+    - depguard # Go linter that checks if package imports are in a list of acceptable packages [fast: true, auto-fix: false]
+    - dogsled # Checks assignments with too many blank identifiers (e.g. x, _, _, _, := f()) [fast: true, auto-fix: false]
+    - dupl # Tool for code clone detection [fast: true, auto-fix: false]
+    - errcheck # checking for unchecked errors in go programs. These unchecked errors can be critical bugs in some cases [fast: true, auto-fix: false]
+    - goconst # Finds repeated strings that could be replaced by a constant [fast: true, auto-fix: false]
+    - gocritic # The most opinionated Go source code linter [fast: true, auto-fix: false]
+    - gocyclo # Computes and checks the cyclomatic complexity of functions [fast: true, auto-fix: false]
+    - godox # Tool for detection of FIXME, TODO and other comment keywords [fast: true, auto-fix: false]
+    - gofmt # Gofmt checks whether code was gofmt-ed. By default this tool runs with -s option to check for code simplification [fast: true, auto-fix: true]
+    - goimports # Goimports does everything that gofmt does. Additionally it checks unused imports [fast: true, auto-fix: true]
+    - gosec # Inspects source code for security problems [fast: true, auto-fix: false]
+    - gosimple # Linter for Go source code that specializes in simplifying a code [fast: false, auto-fix: false]
+    - govet # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string [fast: false, auto-fix: false]
+    - ineffassign # Detects when assignments to existing variables are not used [fast: true, auto-fix: false]
+    - lll # Reports long lines [fast: true, auto-fix: false]
+    - misspell # Finds commonly misspelled English words in comments [fast: true, auto-fix: true]
+    - nakedret # Finds naked returns in functions greater than a specified function length [fast: true, auto-fix: false]
+    - staticcheck # Staticcheck is a go vet on steroids, applying a ton of static analysis checks [fast: false, auto-fix: false]
+    - structcheck # Finds unused struct fields [fast: true, auto-fix: false]
+    - typecheck # Like the front-end of a Go compiler, parses and type-checks Go code [fast: true, auto-fix: false]
+    - unconvert # Remove unnecessary type conversions [fast: true, auto-fix: false]
+    - unused # Checks Go code for unused constants, variables, functions and types [fast: false, auto-fix: false]
+    - unparam # Reports unused function parameters [fast: false, auto-fix: false]
+    - varcheck # Finds unused global variables and constants [fast: true, auto-fix: false]
+    - whitespace # Tool for detection of leading and trailing whitespace [fast: true, auto-fix: true]
+    - revive
   fast: false
-
 
 issues:
   # List of regexps of issue texts to exclude, empty list by default.
@@ -153,16 +176,22 @@ issues:
         - errcheck
         - dupl
         - gosec
+        - scopelint
 
     # Exclude some staticcheck messages
     - linters:
         - staticcheck
-      text: "SA9003:"
+      text: "SA9003:" # Empty body in an if or else branch
 
     # Exclude lll issues for long lines with go:generate
     - linters:
         - lll
       source: "^//go:generate "
+
+    # Exclude some stylecheck messages
+    - linters:
+        - stylecheck
+      text: "ST1000:" # Incorrect or missing package comment
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all

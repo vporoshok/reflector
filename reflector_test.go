@@ -14,8 +14,14 @@ func TestReflector(t *testing.T) {
 		ID   uuid.UUID `foo:"6b245e15-5c88-438b-a170-d8f97460083a"`
 		List []int     `foo:"1,2,3,4"`
 	}
+
+	type Buz struct {
+		B bool `foo:"true"`
+	}
+
 	type Bar struct {
 		Foo
+		B    Buz
 		N    time.Duration `foo:"1m"`
 		S    string
 		Skip string `foo:"-"`
@@ -34,6 +40,7 @@ func TestReflector(t *testing.T) {
 		"List": "1,2,3,4",
 		"N":    "1m",
 		"S":    "",
+		"B.B":  "true",
 	}, m)
 	assert.Equal(t, &x, r.Value())
 
@@ -42,6 +49,9 @@ func TestReflector(t *testing.T) {
 		Foo: Foo{
 			ID:   uuid.FromStringOrNil("6b245e15-5c88-438b-a170-d8f97460083a"),
 			List: []int{1, 2, 3, 4},
+		},
+		B: Buz{
+			B: true,
 		},
 		N:    time.Minute,
 		S:    "",
